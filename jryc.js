@@ -3,9 +3,9 @@
  日期：11-21
  APP：今日越城
  功能：完成任务，获得积分
- 抓包：https://vapp.tmuyun.com/ 任意-请求头中 x-session-id 
- 变量：jrycCookie='xxxx@xxxx '  多个账号用 @ 或者 换行 分割
-       jrychelpAu = true/false 用于是否助力作者
+ 抓包：https://vapp.tmuyun.com/ 任意-请求头中 x-session-id 或使用 手机号#密码 两者互不影响
+ 变量：jrycCookie='xxxx@12345678910#abcdefg '  多个账号用 @ 或者 换行 分割
+       jrychelpAu = true/false 用于是否助力作者(默认为true)
  tg频道：https://t.me/newtab0
  定时一天三次
  cron 10 8,10,19 * * *
@@ -24,7 +24,7 @@
      await requireConfig();
      for (let i = 0; i < cookiesArr.length; i++) {
        if (cookiesArr[i]) {
-         sessionid = cookiesArr[i];
+         sessionid = ''
          msg = '';
          $.index = i + 1;
          $.nickName = '';
@@ -34,6 +34,7 @@
          $.vehicleToken = '';
          $.taskList = {}
          $.queryList = {}
+         await getCookie(cookiesArr[i])
          await account_detail();
          console.log(`\n******开始【🐳今日越城账号${$.index}】${$.nickName}|${$.mobile}*********\n`);
          await main()
@@ -120,6 +121,81 @@
      default:
        console.log(`${task.name}暂未上线,请反馈作者`);
    }
+ }
+ /**
+  * 
+  * 获取登录Code
+  */
+  async function credential_auth() {
+   let url = {
+     url: `https://passport.tmuyun.com/web/oauth/credential_auth`,
+     body: `client_id=48&password=${encodeURIComponent($.pwd)}&phone_number=${$.mobile}`,
+     headers: {
+       'Host': 'passport.tmuyun.com',
+       'Content-Type': 'application/x-www-form-urlencoded',
+       'Accept-Encoding': 'gzip, deflate, br'
+     }
+   }
+   return new Promise(resolve => {
+     $.post(url, async (err, resp, data) => {
+       try {
+         if (err) {
+           console.log(`${err}`)
+           console.log(`${$.name} API请求失败，请检查网路重试`)
+         } else {
+           if (data) {
+             data = JSON.parse(data);
+             //console.log(JSON.stringify(data));
+             if (data.code === 0) {
+               await login(data.data.authorization_code.code)
+             } else {
+               console.log(data.message)
+             }
+           } else {
+             console.log("没有返回数据")
+           }
+         }
+       } catch (e) {
+         $.logErr(e, resp)
+       } finally {
+         resolve(data);
+       }
+     })
+   })
+ }
+ /**
+  * 
+  * 登录
+  */
+ async function login(code) {
+   let body = 'code=' + code
+   sessionid = '63777162fe3fc118b09fab89'
+   return new Promise(resolve => {
+     $.post(taskPostUrl('/api/zbtxz/login', body), async (err, resp, data) => {
+       try {
+         if (err) {
+           console.log(`${err}`)
+           console.log(`${$.name} API请求失败，请检查网路重试`)
+         } else {
+           if (data) {
+             data = JSON.parse(data);
+             //console.log(JSON.stringify(data));
+             if (data.code === 0) {
+               sessionid = data.data.session.id
+             } else {
+               //console.log(JSON.stringify(data))
+             }
+           } else {
+             console.log("没有返回数据")
+           }
+         }
+       } catch (e) {
+         $.logErr(e, resp)
+       } finally {
+         resolve(data);
+       }
+     })
+   })
  }
  /**
   * 
@@ -414,7 +490,7 @@
              //console.log(JSON.stringify(data));
              if (data.code === 0) {
                console.log(`使用成功！`)
-               if (data.data) console.log(`分享任务完成，获得[${data.data.score_notify.integral}]积分`)
+               if (data.data) console.log(`使用成功，获得[${data.data.score_notify.integral}]积分`)
              } else {
                console.log(data.message)
              }
@@ -498,6 +574,7 @@
        "X-TENANT-ID": 31,
        'Host': 'vapp.tmuyun.com',
        "Content-Type": `application/x-www-form-urlencoded`,
+       'User-Agent': `1.2.2;${requestid};iPad13,4;IOS;16.2;Appstore`
      },
    }
  }
@@ -516,6 +593,49 @@
      return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
    }
    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+ }
+ /**
+  * 
+  * RSA加密
+  */
+  async function RSA_Encrypt(data) {
+   let url = {
+     url: `https://www.bejson.com/Bejson/Api/Rsa/pubEncrypt`,
+     headers: {
+       "Accept": "application/json, text/javascript, */*; q=0.01",
+       "Accept-Encoding": " gzip, deflate, br",
+       "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+       "Host": "www.bejson.com",
+       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
+     },
+     body: `publicKey=-----BEGIN+PUBLIC+KEY-----%0D%0AMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD6XO7e9YeAOs%2BcFqwa7ETJ%2BWXizPqQeXv68i5vqw9pFREsrqiBTRcg7wB0RIp3rJkDpaeVJLsZqYm5TW7FWx%2FiOiXFc%2BzCPvaKZric2dXCw27EvlH5rq%2BzwIPDAJHGAfnn1nmQH7wR3PCatEIb8pz5GFlTHMlluw4ZYmnOwg%2BthwIDAQAB%0D%0A-----END+PUBLIC+KEY-----&encStr=${data}&etype=rsa2`
+   }
+   return new Promise(resolve => {
+     $.post(url, async (err, resp, data) => {
+       try {
+         if (err) {
+           console.log(`${err}`)
+           console.log(`${$.name} API请求失败，请检查网路重试`)
+         } else {
+           if (data) {
+             data = JSON.parse(data);
+             //console.log(JSON.stringify(data));
+             if (data.code === 200) {
+ 
+             } else {
+               console.log(data.msg)
+             }
+           } else {
+             console.log("没有返回数据")
+           }
+         }
+       } catch (e) {
+         $.logErr(e, resp)
+       } finally {
+         resolve(data.data);
+       }
+     })
+   })
  }
  /**
   * 
@@ -548,6 +668,18 @@
    } else {
      console.log(`\n【缺少jrycCookies环境变量或者Cookies为空！】`)
      return;
+   }
+ }
+ /**
+  * cookie转换
+  */
+ async function getCookie(rawCookie) {
+   if (rawCookie.includes('#')) {
+     $.pwd = await RSA_Encrypt(rawCookie.split('#')[1])
+     $.mobile = rawCookie.split('#')[0]
+     await credential_auth()
+   } else {
+     sessionid = rawCookie;
    }
  }
  // prettier-ignore
