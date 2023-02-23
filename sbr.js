@@ -96,7 +96,9 @@ async function main() {
   } else console.log(`暂无抽奖次数~`)
 
   console.log(`\n【获取账号情况】`)
-  await granary()
+  await index()
+  console.log(`当前账号总数：${$.total}大米`)
+  msg += `当前账号总数：${$.total}大米\n\n`
   await $.wait(1000)
 
   await showMsg()
@@ -389,9 +391,10 @@ async function index() {
         } else {
           if (data) {
             data = JSON.parse(data);
-            //console.log(JSON.stringify(data));
+            console.log(JSON.stringify(data));
             if (data.code === 1) {
               $.taskList = data.data['rice_list']
+              $.total = data.data['sign_rice_num']
               //console.log(JSON.stringify($.taskList))
             } else {
               console.log(data.msg)
@@ -426,41 +429,6 @@ async function collect(id) {
             //console.log(JSON.stringify(data));
             if (data.code === 1) {
               console.log(`成功！总计:${data.data['sign_rice_num']}大米`)
-            } else {
-              console.log(data.msg)
-            }
-          } else {
-            console.log("没有返回数据")
-          }
-        }
-      } catch (e) {
-        $.logErr(e, resp)
-      } finally {
-        resolve(data);
-      }
-    })
-  })
-}
-/**
- * 
- * 获取账号情况
- */
-async function granary() {
-  let body = `?&page=1&pagesize=10`
-  return new Promise(resolve => {
-    $.get(taskUrl('index/granary', body), async (err, resp, data) => {
-      try {
-        if (err) {
-          console.log(`${err}`)
-          console.log(`${$.name} API请求失败，请检查网路重试`)
-        } else {
-          if (data) {
-            data = JSON.parse(data);
-            //console.log(JSON.stringify(data));
-            if (data.code === 1) {
-              console.log(`当前账号总数：${data.data['total_num']}大米`)
-              msg += `当前账号总数：${data.data['total_num']}大米\n\n`
-              //console.log(JSON.stringify($.friendList))
             } else {
               console.log(data.msg)
             }
