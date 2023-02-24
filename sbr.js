@@ -5,7 +5,8 @@
  入口：苏泊尔会员中心小程序->首页->种大米
  功能：完成任务
  抓包：https://growrice.supor.com/rice/backend/public/index.php/api/login/auto-login? 链接中的 token=xxxxxxxxxx
- 变量：sbrCookie='eyJ0xxxxxx@xxxxxxxx'  多个账号用 @ 或者 换行 分割 
+ 变量：sbrCookie='eyJ0xxxxxx@xxxxxxxx'  多个账号用 @ 或者 换行 分割
+ tg频道：https://t.me/newtab0
  定时每天三次
  cron: 14 0,8,19 * * *
  */
