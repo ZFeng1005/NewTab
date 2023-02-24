@@ -5,8 +5,7 @@
  入口：#小程序://蒙牛营养生活家/FzGssVYt9
  功能：签到-完成任务
  抓包：https://member-api.mengniu.cn/ 请求中的 X-Token(不带Bearer,有效期一个月)
- 变量：mnCookie='X-Token@xxxxxxxx'  多个账号用 @ 或者 换行 分割
- tg频道：https://t.me/newtab0
+ 变量：mnCookie='X-Token@xxxxxxxx'  多个账号用 @ 或者 换行 分割 
  定时每天三次
  cron: 24 8,18,23 * * *
  */
@@ -63,6 +62,12 @@ async function main() {
         continue
       }
     }
+    console.log(`【开始分享抽奖页】`)
+    await share()
+    await $.wait(1500)
+    console.log(`【开始抽奖】`)
+    await lottery()
+    await $.wait(1500)
     console.log(`【查询账号信息】`)
     await centerInfo()
     console.log(`用户ID:[${$.memberId}]，拥有:[${$.point}]积分`)
@@ -175,6 +180,75 @@ async function taskSubmit(id, businessCode) {
 }
 /**
  * 
+ * 分享
+ */
+async function share() {
+  let body = `{"mer_id":96}`
+  return new Promise(resolve => {
+    $.post(lotteryPostUrl('share_success', body), async (err, resp, data) => {
+      try {
+        if (err) {
+          console.log(`${err}`)
+          console.log(`${$.name} API请求失败，请检查网路重试`)
+        } else {
+          if (data) {
+            data = JSON.parse(data);
+            //console.log(JSON.stringify(data));
+            if (data.status === 200) {
+              console.log(`分享成功！`)
+              //console.log(JSON.stringify($.taskList))
+            } else {
+              console.log(data.msg)
+            }
+          } else {
+            console.log("没有返回数据")
+          }
+        }
+      } catch (e) {
+        $.logErr(e, resp)
+      } finally {
+        resolve(data);
+      }
+    })
+  })
+}
+/**
+ * 
+ * 抽奖
+ */
+async function lottery() {
+  let body = `{"mer_id":96}`
+  return new Promise(resolve => {
+    $.post(lotteryPostUrl('lucky_draw', body), async (err, resp, data) => {
+      try {
+        if (err) {
+          console.log(`${err}`)
+          console.log(`${$.name} API请求失败，请检查网路重试`)
+        } else {
+          if (data) {
+            data = JSON.parse(data);
+            //console.log(JSON.stringify(data));
+            if (data.status === 200) {
+              console.log(`抽奖成功，获得:${data.data.level}[${data.data.prize_name}]`)
+              msg += `抽奖获得:${data.data.level}[${data.data.prize_name}]\n`
+              //console.log(JSON.stringify($.taskList))
+            } else {
+              console.log(data.message)
+            }
+          } else {
+            console.log("没有返回数据")
+          }
+        }
+      } catch (e) {
+        $.logErr(e, resp)
+      } finally {
+        resolve(data);
+      }
+    })
+  })
+}
+/**
+ * 
  * API
  */
 function taskUrl(type, body) {
@@ -201,6 +275,22 @@ function taskPostUrl(type, body) {
       'Content-Type': 'application/json',
       'Accept-Encoding': 'gzip, deflate, br',
       'Accept-Language': 'en-us,en'
+    },
+    body: body
+  }
+}
+
+function lotteryPostUrl(type, body) {
+  return {
+    url: `https://mul-cml.mengniu.cn/api/store/lottery/${type}/334`,
+    headers: {
+      'Host': 'mul-cml.mengniu.cn',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36 MicroMessenger/7.0.9.501 NetType/WIFI MiniProgramEnv/Windows WindowsWechat',
+      'CHANNEL': 1,
+      'MERCHANT': 96,
+      'X-Token': 'Bearer ' + cookie,
+      'Content-Type': 'application/json',
+      'Accept-Encoding': 'gzip, deflate, br',
     },
     body: body
   }
