@@ -669,7 +669,7 @@
      console.log(`\n=============================================    \n脚本执行 - 北京时间(UTC+8)：${new Date(new Date().getTime() +new Date().getTimezoneOffset() * 60 * 1000 + 8 * 60 * 60 * 1000).toLocaleString()} \n=============================================\n`)
      console.log(`\n=========共有${cookiesArr.length}个${$.name}账号Cookie=========\n`);
    } else {
-     console.log(`\n【缺少jrycCookies环境变量或者Cookies为空！】`)
+     console.log(`\n【缺少jrycCookie环境变量或者jrycCookie为空！】`)
      return;
    }
  }
