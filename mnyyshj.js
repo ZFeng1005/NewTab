@@ -51,7 +51,7 @@ async function main() {
         console.log(`去完成:[${$.taskList[j].name}]`)
         await taskSubmit($.taskList[j].id, $.taskList[j].businessCode)
         await $.wait(1500)
-      } else if ($.taskList[j].isCompleted === '0' && $.taskList[j].id === 238) {
+      } else if ($.taskList[j].isCompleted === '0' && $.taskList[j].name === '邀请好友入会') {
         console.log(`去完成:[${$.taskList[j].name}],共[${$.taskList[j].inviteNums}]次`)
         for (k = 0; k < $.taskList[j].inviteNums; k++) {
           await taskSubmit($.taskList[j].id, $.taskList[j].businessCode)
@@ -217,7 +217,7 @@ async function share() {
  * 抽奖
  */
 async function lottery() {
-  let body = `{"mer_id":96}`
+  let body = `{"mer_id":91}`
   return new Promise(resolve => {
     $.post(lotteryPostUrl('lucky_draw', body), async (err, resp, data) => {
       try {
@@ -282,12 +282,12 @@ function taskPostUrl(type, body) {
 
 function lotteryPostUrl(type, body) {
   return {
-    url: `https://mul-cml.mengniu.cn/api/store/lottery/${type}/334`,
+    url: `https://mul-cml.mengniu.cn/api/store/lottery/${type}/352`,
     headers: {
       'Host': 'mul-cml.mengniu.cn',
       'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36 MicroMessenger/7.0.9.501 NetType/WIFI MiniProgramEnv/Windows WindowsWechat',
       'CHANNEL': 1,
-      'MERCHANT': 96,
+      'MERCHANT': 91,
       'X-Token': 'Bearer ' + cookie,
       'Content-Type': 'application/json',
       'Accept-Encoding': 'gzip, deflate, br',
