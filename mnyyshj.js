@@ -51,7 +51,7 @@ async function main() {
         console.log(`去完成:[${$.taskList[j].name}]`)
         await taskSubmit($.taskList[j].id, $.taskList[j].businessCode)
         await $.wait(1500)
-      } else if ($.taskList[j].isCompleted === '0' && $.taskList[j].name === '邀请好友入会') {
+      } else if ($.taskList[j].isCompleted === '0' && $.taskList[j].inviteNums !== -1) {
         console.log(`去完成:[${$.taskList[j].name}],共[${$.taskList[j].inviteNums}]次`)
         for (k = 0; k < $.taskList[j].inviteNums; k++) {
           await taskSubmit($.taskList[j].id, $.taskList[j].businessCode)
@@ -94,9 +94,9 @@ async function centerInfo() {
             if (data.code === 200) {
               $.memberId = data.data.memberInfo.id
               $.mobile = data.data.memberInfo.mobile
-              $.nickName = data.data.memberInfo.name
+              $.nickName = data.data.memberInfo.nickName
               $.unionId = data.data.memberInfo.unionId
-              $.point = data.data.proteinInfo.issuePoints
+              $.point = data.data.proteinInfo.pointsBalance
             }
           } else {
             console.log("没有返回数据")
