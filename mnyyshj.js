@@ -40,7 +40,7 @@ let cookiesArr = [],
 async function main() {
   if ($.unionId) {
     console.log(`【开始每日签到】`)
-    await taskSubmit(113, '01')
+    await signInfo()
     await $.wait(1500)
     console.log(`【获取任务列表】`)
     await taskList()
@@ -106,6 +106,40 @@ async function centerInfo() {
         $.logErr(e, data)
       } finally {
         resolve(resp);
+      }
+    })
+  })
+}
+/**
+ * 获取签到详情
+ */
+async function signInfo() {
+  let body = `?businessCode=01&unionId=${$.unionId}`
+  return new Promise(resolve => {
+    $.get(taskUrl('signInfo', body), async (err, resp, data) => {
+      try {
+        if (err) {
+          console.log(`${err}`)
+          console.log(`${$.name} API请求失败，请检查网路重试`)
+        } else {
+          if (data) {
+            data = JSON.parse(data);
+            //console.log(JSON.stringify(data));
+            if (data.code === 200) {
+              if (data.data.isCompleted == -1) {
+                await taskSubmit(data.data.id, data.data.businessCode)
+              } else console.log(`[今日签到]已完成`)
+            } else {
+              console.log(data.msg)
+            }
+          } else {
+            console.log("没有返回数据")
+          }
+        }
+      } catch (e) {
+        $.logErr(e, resp)
+      } finally {
+        resolve(data);
       }
     })
   })
